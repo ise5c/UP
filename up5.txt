@@ -1,0 +1,212 @@
+PYTHON PROGRAMS
+# 18a)
+# checking whether a given number is perfect or not
+#
+factors = []
+num = int(raw_input("Enter a number :"))
+flist = range(num/2)
+flist.append(num/2)
+for eachnum in flist[1:]:
+    if num % eachnum == 0 :
+          factors.append(eachnum)
+sum = 0
+for eachfactor in factors:
+   sum += eachfactor
+if sum == num :
+   print "number %d is perfect" % (num)
+else:
+   print "number %d is not perfect" % (num)
+
+gedit perfect.py
+[5b@localhost ~]$ python perfect.py
+Enter a number :5
+number 5 is not perfect
+
+-----------------------------------------------------------------------------------------------------------------
+
+# 18b)
+# Checking a given identifier is valid or not
+#
+import string
+alphas = string.letters + '_'
+nums = string.digits
+inp = raw_input("Identifier to test? ")
+if len(inp) > 1:
+   if inp[0] not in alphas:
+       print '''invalid : First symbol must be 
+            alphabetic'''
+   else:
+       for otherchar in inp[1:]:
+           if otherchar not in alphas + nums :
+                 print '''invalid : remaining symbols
+                       must be alphanumeric'''
+                 break
+       else:
+           print "okay as an identifier"
+
+[5b@localhost ~]$ python id.py
+Identifier to test? 1
+invalid : First symbol must be 
+            alphabetic
+[5b@localhost ~]$ python id.py
+Identifier to test? a
+okay as an identifier
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+# 19a
+# sorting a given string into ascending order
+#
+inp = raw_input("Enter a string to be sorted: ")
+ilist = range(len(inp))
+for index in ilist:
+    jlist = index + 1
+    while jlist <= (len(inp) - 1):
+        if inp[index] > inp[jlist] :
+            inp = inp[:index] + inp[jlist] + inp[index] + inp[jlist+1:]
+        jlist += 1
+print inp
+
+[5b@localhost ~]$ python 2a.py
+Enter a string to be sorted: iut
+itu
+
+--------------------------------------------------------------------------------------------------------------------
+
+
+# 19b
+# Read a line and check if each word is a palindrome
+#
+def palindrome(inp):
+    istart = 0
+    iend = len(inp) - 1
+    while istart <= iend :
+        if (inp[istart] != inp[iend] ):
+             print "string %s is not palindrome" % inp
+             break
+        else:
+             istart += 1
+             iend -= 1
+    else:
+      print "string %s is a palindrome" % inp
+instr = raw_input("Enter a line: ")
+wordlist = instr.split(" ")
+for eachword in wordlist :
+     palindrome(eachword)
+
+Enter a line: madam
+string madam is a palindrome
+----------------------------------------------------------------------------------------------------------------------
+
+
+# 20a
+# count number of characters, words and lines in a given file
+#
+words = 0
+lines = 0
+chars = 0
+filename = raw_input("Enter a filename: ")
+file = open(filename, "r")
+allLines = file.readlines()
+for eachline in allLines:
+    lines += 1
+    chars += len(eachline)
+    words += len(eachline.split(" "))
+print "filename is %s:\n" % filename
+print "words = %d, lines = %d, characters = %d" % (words, lines, chars)
+
+gedit 1.txt
+mani shashi ramesh raju
+gggg
+
+Enter a filename: 1.txt
+filename is 1.txt:
+
+words = 5, lines = 2, characters = 29
+
+
+-------------------------------------------------------------------------------------------------------------------------
+
+# 20b
+# Write info, read odd no of info from file and convert to uppercase
+#
+filename = raw_input("Enter a filename : ")
+file = open(filename, "w")
+lines = []
+for line in range(4):
+   eachline = raw_input("Enter a line:")
+   lines.append(eachline)
+file.writelines([x + '\n' for x in lines])
+file.close()
+file = open(filename,"r")
+allLines = file.readlines()
+nooflines = len(allLines)
+for eachline in range(nooflines):
+   if eachline % 2 == 1:
+       print allLines[eachline].upper(),
+print ''
+
+[5b@localhost ~]$ python 3b.py
+Enter a filename : 1.txt
+Enter a line:etherh
+Enter a line:ghjsdrh
+Enter a line:mmyhjy
+Enter a line:degeg
+GHJSDRH
+DEGEG
+--------------------------------------------------------------------------------------------------------------------------------
+
+
+# 21a)
+# Exception handling
+#
+try:
+    for num in [4, 7, 14, 0, 2]:
+       print "result is = %d" % (28/num)
+except ZeroDivisionError:
+       print "divide by zero error"
+print "exception handling complete"
+try:
+    aList = [1,2,3,4]
+    for idx in range(5):
+        print "num = %d" % aList[idx]
+except IndexError:
+    print "Index Error has occurred"
+print "exception handling 2 is complete"
+
+[5b@localhost ~]$ python 4b.py
+result is = 7
+result is = 4
+result is = 2
+divide by zero error
+exception handling complete
+num = 1
+num = 2
+num = 3
+num = 4
+Index Error has occurred
+exception handling 2 is complete
+    
+-----------------------------------------------------------------------------------------------------------------
+# 21b)
+# user defined exception
+#
+class TooHot(Exception):
+   pass
+tlist = [10,20,30,40,50,45]
+for temp in tlist:
+     try:
+         if temp == 50:
+             raise TooHot
+         print "temp = ", temp
+     except TooHot:
+         print "temparature is too hot"
+         continue
+
+o/p:-
+temp =  10
+temp =  20
+temp =  30
+temp =  40
+temparature is too hot
+temp =  45

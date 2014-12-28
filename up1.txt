@@ -1,0 +1,135 @@
+1a)
+if [ $# -ne 2 ] ; then
+  echo "Enter 2 filenames"
+  exit 1
+fi
+x=$1
+y=$2
+set -- `ls -l $x`
+x1=$1
+set -- `ls -l $y`
+y1=$1
+if [ $x1 = $y1 ] ; then
+  echo " permissions are same "
+  echo " $x "
+else
+  echo " permissions are different "
+  echo " $x : $x1"
+  echo " $y : $y1"
+fi
+
+1b)
+echo -e "Enter 3 numbers: \c"
+read n1 n2 n3
+s=$n1
+if [ $s -gt $n2 ] ; then
+     s=$n2
+fi
+if [ $s -gt $n3 ] ; then
+     s=$n3
+fi
+echo "smallest number is: $s"
+
+2a)
+if [ $# -eq 2 ] ; then
+   cd $2
+fi
+x=$1
+if [ -f $1 ] ; then
+  set -- `ls -l $1`
+  if [ $2 -gt 1 ] ; then
+     set -- `ls -li $x`
+     ino=$1
+     echo "inode no is $ino"
+     ls -liR | grep $ino 
+  else
+     echo  "$x has no links"
+  fi
+else
+     echo "file $x does not exist"
+fi
+
+2b)
+if [ -f $1 ] ; then
+    set -- `ls -l $1`
+    echo "$6 $7"
+else
+    echo -e "$1 does not exist \c"
+fi
+
+3a)
+#terminal locking program 8a
+#
+echo -e "Enter a password : \c"
+stty -echo
+read psw1
+echo -e "\nEnter password again: \c"
+read psw2
+if [ $psw1 = $psw2 ] ; then
+   tput clear
+   echo " Terminal is locked" 
+   echo -e " Enter password to unlock: \c"
+   read psw3
+   while [ $psw3 != $psw1 ] ; do
+     echo "\n password did not match"
+     echo -e "Enter pswd to unlock:\c"
+     read psw3 
+     tput clear
+   done  
+   tput clear
+   echo " terminal is unlocked "
+   stty echo
+else
+   echo "terminal is not locked"
+fi
+
+
+3b)
+while echo -e "Enter a string: \c" ; do
+   read str
+   if [ `expr "$str" : '.*'` -lt 10 ] ; then
+      echo "Name too short"
+   else break
+   fi
+done
+
+4a)
+d1=`date +%d`
+echo $d1
+if [ $d1 -gt 9 ] ; then
+   cal | sed "s/$d1/**/"
+else
+   d1=`expr $d1 + 1 - 1`
+   cal | sed "s/ $d1/*/"
+fi
+
+
+4b)
+echo -e "Enter a file name: \c"
+read fname
+if [ -f $fname ] ; then
+   set -- `ls -li $fname`
+   echo "properties of $fname"
+   echo "inode no : $1"
+   echo "permissions are : $2"
+   echo "no of links : $3"
+   echo "owner's username: $4"
+   echo "owner's groupname : $5"
+   echo "file size: $6 bytes"
+   echo "modification time: $7 $8 $9"
+else
+   echo " file $fname does not exist"
+fi
+
+5a)
+for fil in $* ; do
+   tr '[a-z]' '[A-Z]' < $fil | tee "t$fil"
+done
+
+5b)
+sum=0
+for num in $@ ; do
+sum=`expr $sum + $num`
+done
+echo "$sum"
+

@@ -1,0 +1,205 @@
+AWK  SCRIPTS
+14a) Write an awk script to find the trace of a matrix.
+gedit  trace.awk
+BEGIN { print "welcome to matrix trace program ",FS = " ";temp=1}
+{total =total+$temp;
+temp++;}
+END { print "trace is =",total;}
+gedit matrix.txt
+1 2 3
+4 5 6
+7 8 9
+Execution: awk –f  trace.awk  matrix.txt
+14b) Develop a control-break awk program that reads empn.lst and prints a report that groups employees of the same department. For each department, the report should print: (i) the department name on the top. (ii) the remaining details of every person in the department. (iii) total salary bill for that department. Do you need to process the input before it is read by awk? 
+
+gedit empn.awk
+
+BEGIN{
+FS="|"
+X="Report"
+for(k=1;k<(55-length(X))/2;k++)
+printf "%s"," "
+print X
+}
+NR == 1,NR == 15{
+dname[$4]=$4
+empno[$4,eno]=$1
+ename[$4,eno]=$2
+edesig[$4,eno]=$3
+edname[$4,eno]=$4
+edob[$4,eno]=$5
+esal[$4,eno]=$6
+eno++
+}
+END{ for(key in dname)
+{
+print key
+for(en=0;en<eno;en++)
+{
+if(key==edname[key,en]){
+printf "%4s %-20s %-12s %8s %4d \n",empno[key,en],ename[key,en],edesig[key,en],edob[key,en],esal[key,en]
+total[key]+=esal[key,en]
+}
+}
+printf "total salary for %s=%d\n",key,total[key]
+}
+}
+
+
+gedit empn.lst
+
+2233|a.k shukla|g.m.|sales|12/12/52|6000|
+9876|jai sharma|director|production|12/03/50|7000|
+5678|sumit chakrabarty|d.g.m|marketing|19/04/43|6000|
+2365|barun sengupta|director|personnel|11/05/47|7800|
+5423|n.k. gupta|chairman|admin|30/08/56|5400|
+1006|chanchal singhvi|director|sales|03/09/38|6700|
+6213|karuna ganguly|g.m.|accounts|05/06/62|6300|
+1265|s.n. dasgupta|manager|sales|12/09/63|5600|
+4290|jayant choudhury|executive|production|07/09/50|6000|
+2476|anil aggarwal|manager|sales|01/05/59|5000|
+6521|lalit chowdury|director|marketing|26/09/45|8200|
+3212|shyam saksena|d.g.m.|accounts|12/12/55|6000|
+3564|sudhir agarwal|executive|personnel|06/07/47|7500|
+2345|j.b. saxena|g.m.|marketing|12/03/45|8000|
+0110|v.k. agrawal|g.m.|marketing|31/12/40|9000|
+
+
+
+
+
+output
+
+[5a@172-1-4-31 ~]$ awk -f empn.awk  empn.lst
+                        Report
+marketing
+5678 sumit chakrabarty    d.g.m        19/04/43 6000 
+6521 lalit chowdury       director     26/09/45 8200 
+2345 j.b. saxena          g.m.         12/03/45 8000 
+0110 v.k. agrawal         g.m.         31/12/40 9000 
+total salary for marketing=31200
+admin
+5423 n.k. gupta           chairman     30/08/56 5400 
+total salary for admin=5400
+production
+9876 jai sharma           director     12/03/50 7000 
+4290 jayant choudhury     executive    07/09/50 6000 
+total salary for production=13000
+accounts
+6213 karuna ganguly       g.m.         05/06/62 6300 
+3212 shyam saksena        d.g.m.       12/12/55 6000 
+total salary for accounts=12300
+personnel
+2365 barun sengupta       director     11/05/47 7800 
+3564 sudhir agarwal       executive    06/07/47 7500 
+total salary for personnel=15300
+sales
+1006 chanchal singhvi     director     03/09/38 6700 
+1265 s.n. dasgupta        manager      12/09/63 5600 
+2476 anil aggarwal        manager      01/05/59 5000 
+total salary for sales=17300
+
+
+
+//one small error! which is...
+the first line in lst file with a.k.shukla isnt been considered by the awk file
+____________________________________________________________________________
+15a) Write an awk script that count the number of words and lines in an input file "hello.txt". ramesh@ubuntu:~/uplab$ awk '{ words += NF } END { print "words =",words, "lines= ",NR }' sedcomment.txt
+words = 5 lines=  4
+15b) Write a shell script that uses awk to find the total size of all ordinary files owned by a user, whose name is specified as argument. First check whether the user is available in /etc/passwd. 
+
+if grep "^$1" /etc/passwd 2>/dev/null
+then
+echo "user $1 found"
+find . –type f –user $1 –ls | awk ‘{total += $7} end { print "total=", total }’
+else
+echo " user $1 not found"
+fi 
+
+Execute the shell script: $sh tsize.sh 5a
+
+16a) Write an awk script that prints total number of input lines, prints number of fields in each line, prints the value of the last field in each line, prints the value of the last field of the last line.
+
+ramesh@ubuntu:~/uplab$ awk '{ print NR,NF,$NF} END {print "Last field=",$NF,"Lines=",NR}' ise.txt
+1 1 aaaaa
+2 1 bbbbb
+3 1 cccc
+Last field= cccc Lines= 3
+16b) Write an awk sequence in a shell script which accepts input from the standard input. The program should print the total of any column specified as argument. 
+ create a shell script file  tawk.sh containing the following line
+
+  awk -v x=$1 '{total += $x} END { print "total = ",total }' -
+
+  Execute the script
+
+ $sh tawk.sh <any column number>
+<now enter the data from key board>
+12 12 13
+10 15 14
+23 23 23
+<ctrl-d>
+<answer will appear as>
+total = xxx
+
+17a) Write an awk script that prints any input line that has more than four fields, prints lines in which the value of the last field is more than 4.
+ramesh@ubuntu:~/uplab$ cat>test.dat
+Apple costs 7
+Orange costs per fruit 8
+Goa costs per fruit  3
+Sapota costs 4
+Pomegranate fruits costs per fruit 20
+ramesh@ubuntu:~/uplab$ 
+ramesh@ubuntu:~/uplab$ awk '{ if (NF >4 && $NF > 4) { print $0 } }' test.dat
+Orange costs per fruit 8
+Pomegranate fruits costs per fruit 20
+
+ramesh@ubuntu:~/uplab$
+ramesh@ubuntu:~/uplab$ awk '{ if (NF >4 && $NF > 4) { print $0 } }' test.dat
+Orange costs per fruit 8
+Pomegranate fruits costs per fruit 20
+
+17b) A stamp dealer maintains a price list that displays the country, the Scott catalog number, year of issue, description and price:
+Kenya 288-92 1984 Heron Plover Thrush Gonolek Apalis $6.60	
+Surinam 643-54 1983 Butterflies $7.50
+Seychelles 831-34 2002 WWF Frogs set of 4 $1.40
+Togo 1722-25 1996 Cheetah, Zebra, Antelope $5.70
+Write an awk program to print a formatted report of the data as well as the total price. Note that the description contains a variable number of words.
+4b.awk
+
+{ country[NR] = $1
+
+catalog[NR] = $2
+
+yoi[NR] = $3
+
+for (k = 4; k < NF ; k++)
+
+{ desc[NR] = desc[NR] " " $k }
+
+if (length(desc[NR]) > maxlen)
+
+{ maxlen = length(desc[NR]) }
+
+price[NR] = $NF
+
+} END {
+
+for(k=1; k <= NR ; k++){
+
+printf "%-10s %-7s %4s", country[k],catalog[k], yoi[k]
+
+x = length(desc[k])
+
+printf "%s", desc[k]
+
+for (j = 0; j<=(maxlen –x) ; j++){
+
+printf "%s", " "
+
+}
+
+printf "%s\n", price[k]
+
+}
+
+}

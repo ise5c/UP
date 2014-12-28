@@ -1,0 +1,464 @@
+
+SYSTEM CALLS EXERCISE
+6a
+#include <stdio.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+int main(int argc, char **argv){
+   int exitstatus, i,j,sum;
+   switch(fork()){
+     case 0 : 
+        printf("CHILD process: Summing two numbers\n") ;   
+        exit(atoi(argv[1])+atoi(argv[2]));
+     default : 
+        printf("PARENT process: waiting for CHILD \n") ;
+        wait(&exitstatus);
+        printf("PARENT process: sum is %d\n",WEXITSTATUS(exitstatus));
+        exit(0);
+   }
+}
+OUTPUT
+[5b@172-1-4-31 ~]$ cc 11a.c
+[5b@172-1-4-31 ~]$ ./a.out 2 3
+PARENT process: waiting for CHILD 
+CHILD process: Summing two numbers
+PARENT process: sum is 5
+[5b@172-1-4-31 ~]$ ./a.out 26 5
+PARENT process: waiting for CHILD 
+CHILD process: Summing two numbers
+PARENT process: sum is 31
+6b.
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+int main(int argc, char **argv){
+   int exitstatus;
+   printf("process A : forking process B\n");
+   switch(fork()){
+     case 0 : 
+        printf("process B: forking process C\n") ; 
+        switch(fork()){
+        case 0 : 
+            printf("process C: summing two numbers\n");  
+            exit(atoi(argv[1])+atoi(argv[2]));
+        default : 
+            printf("process B: waiting for C\n");
+            wait(&exitstatus);
+            printf("process B: doubling the sum \n");
+            exit(2 * WEXITSTATUS(exitstatus));
+        }
+     default : 
+        printf("process A: waiting for B \n") ;
+        wait(&exitstatus);
+        printf("process A: product is %d\n",WEXITSTATUS(exitstatus));
+        exit(0);
+   }
+}
+
+
+[5b@172-1-4-31 ~]$ ./a.out 6 5
+process A : forking process B
+process A: waiting for B 
+process B: forking process C
+process B: waiting for C
+process C: summing two numbers
+process B: doubling the sum 
+process A: product is 22
+
+7a1…
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+#include <unistd.h>
+int main(){
+    int exitstatus;
+    printf("Parent process: forking child \n");
+    switch(fork()){
+        case 0: printf("Child process: issuing execl\n");
+                execl("/bin/sh","sh","-c","ls -lS|grep -v '^d'|head -n 6",(char *) 0);
+        default : 
+            printf("Parent process: Waiting for child\n");
+            wait(&exitstatus);
+            exit(0);
+    }
+}
+
+7a2…
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+#include <unistd.h>
+int main(){
+    int exitstatus;
+    
+    char *envargs[] = { NULL };
+    printf("Parent process: forking child \n");
+    switch(fork()){
+        case 0: printf("Child process: issuing execl\n");
+		printf("Total number of system process currently running on your system are\n");
+                execle("/bin/sh","sh","-c","ps -e|wc -l",(char *)0,envargs);
+        default : 
+            printf("Parent process: Waiting for child\n");
+            wait(&exitstatus);
+            exit(0);
+    }
+}
+
+7a3…
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+#include <unistd.h>
+int main(){
+    int exitstatus;
+    char *cmdargs[] = { "sort","-t","|","-k","2","emp.txt", NULL };
+    printf("Parent process: forking child \n");
+    switch(fork()){
+        case 0: printf("Child process: issuing execvp\n");
+                execvp("sort", cmdargs);
+        default : 
+            printf("Parent process: Waiting for child\n");
+            wait(&exitstatus);
+            exit(0);
+    }
+}
+
+7b1…
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <error.h>
+#include <wait.h>
+int main(void){
+   int exitstatus;
+   char *cmdargs[] = { "./fact", NULL } ;
+   char *envargs[] = { NULL };
+   printf("Parent process:\n");
+   switch(fork()){
+      case 0: printf("Child process is executing execve:\n");
+              if(execve("/home/shashidhar/Documents/fwd/fact", cmdargs,envargs) < 0) { perror("execlp error:"); exit(1); }
+      default: printf("Parent waiting for child:\n");
+               wait(&exitstatus);
+               printf("Child exited with status:%d\n", WEXITSTATUS(exitstatus));
+               exit(0);
+   } 
+}
+7b2…
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <error.h>
+#include <wait.h>
+int main(void){
+   int exitstatus;
+   printf("Parent process:\n");
+   switch(fork()){
+      case 0: printf("Child process is executing execlp:\n");
+              if(execlp("sh","sh","-c","find . -type f -executable -print |grep -n './'",(char *)0) < 0) { perror("execlp error:"); exit(1); }
+      default: printf("Parent waiting for child:\n");
+               wait(&exitstatus);
+               printf("Child exited with status:%d\n", WEXITSTATUS(exitstatus));
+               exit(0);
+   } 
+}
+
+7b3
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <error.h>
+#include <wait.h>
+int main(void){
+   int exitstatus;
+  
+   char *argv[]={"sh","-c","echo $SHELL",NULL};
+   printf("Parent process:\n");
+   switch(fork()){
+      case 0: printf("Child process is executing execv:\n");
+              if(execv("/bin/sh",argv) < 0) { perror("execlp error:"); exit(1); }
+      default: printf("Parent waiting for child:\n");
+               wait(&exitstatus);
+               printf("Child exited with status:%d\n", WEXITSTATUS(exitstatus));
+               exit(0);
+   } 
+}
+
+
+
+
+8a.
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <error.h>
+
+int main(void){
+    int fd;
+    char buf[20] = "01234567890123456789";
+    printf("creating file unix.txt\n");
+    fd = creat("unix.txt",S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH );
+    if (fd == -1){ perror("creat error:"); exit(1); }
+    if (write(fd, buf, 20) < 0){ perror("write error:"); exit(2);}
+    lseek(fd,50,SEEK_CUR);
+    close(fd);
+    chmod("unix.txt",S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+}
+
+
+OUUTPUT
+
+
+[5b@172-1-4-31 ~]$ gedit 13aa.c
+[5b@172-1-4-31 ~]$ cc 13aa.c
+[5b@172-1-4-31 ~]$ ./a.out 
+creating file unix.txt
+[5b@172-1-4-31 ~]$ od -bc unix.txt
+0000000 060 061 062 063 064 065 066 067 070 071 060 061 062 063 064 065
+          0   1   2   3   4   5   6   7   8   9   0   1   2   3   4   5
+0000020 066 067 070 071
+          6   7   8   9
+0000024
+[5b@172-1-4-31 ~]$ ^C
+[5b@172-1-4-31 ~]$ 
+
+8b.
+#include <stdio.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <error.h>
+#include<time.h>
+void quit( char * mesg, int exit_status){
+     perror(mesg);
+     exit(exit_status);
+}
+void filoprs(char *filname){
+     char buf[20] = "01234567890123456789";
+     struct stat statbuf;
+     int fd1;
+
+     printf("creating file:%s\n",filname);
+     fd1 = creat(filname,S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH );
+     if (fd1 == -1)quit("creat error:",3);
+
+     if (write(fd1, buf, 20) < 0) quit("write error:", 5); 
+     close(fd1);
+
+     fd1=open(filname,O_RDONLY);
+     if (fd1 < 0)quit("open error:", 6);
+     read(fd1, buf, 15);
+     close(fd1);
+     if ( lstat(filname, &statbuf) == -1) quit("stat error:",7);
+     printf("time of last access: %s\n", ctime(&statbuf.st_atime));
+     printf("UID : %d \n", statbuf.st_uid);
+     printf("File size: %d bytes\n",statbuf.st_size); 
+}
+int main(void){
+    int fd;
+    char buf1[30];
+    
+    printf("creating a directory called msrit11:\n");
+    fd = mkdir("msrit111", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+    if (fd == -1)quit("mkdir error:", 1);
+    if (chdir("msrit111") < 0)quit("chdir error:",2);
+
+    
+    filoprs("foo.txt");
+    filoprs("hello.txt");
+   
+    if ( getcwd(buf1, 20) == NULL) quit("getcwd error:",8);
+    printf("Current working directory: %s \n", buf1);
+    exit(0);
+
+}
+
+Output:
+[5b@172-1-4-31 ~]$ gedit 13th.c
+[5b@172-1-4-31 ~]$ cc 13th.c
+[5b@172-1-4-31 ~]$ ./a.out
+creating a directory called msrit11:
+creating file:foo.txt
+time of last access: Wed Dec  3 15:25:51 2014
+
+UID : 1007 
+File size: 20 bytes
+creating file:hello.txt
+time of last access: Wed Dec  3 15:25:51 2014
+
+UID : 1007 
+File size: 20 bytes
+Current working directory: /home/5b/msrit111 
+[5b@172-1-4-31 ~]$ 
+
+9a.
+Write a  C program to implement Orphan process and display the output
+
+#include<stdio.h>
+
+main()
+{
+    int id;
+
+    printf("Before fork()\n");
+    id=fork();
+
+    if(id==0)
+    {
+        printf("Child has started: %d\n ",getpid());
+        printf("Parent of this child : %d\n",getppid());
+        printf("child prints 1 item :\n ");
+        sleep(10);
+        printf("child prints 2 item :\n");
+    }
+    else
+    {
+        printf("Parent has started: %d\n",getpid());
+        printf("Parent of the parent proc : %d\n",getppid());
+    }
+
+    printf("After fork()");
+}
+output:-
+
+Before fork()
+Parent has started: 4901
+Parent of the parent proc : 4846
+After fork()Child has started: 4902
+ Parent of this child : 4901
+child prints 1 item :
+[5b@172-1-4-31 ~]$  child prints 2 item :
+After fork()^C
+
+9b.
+Write a  C program to implement Zombie process and display the output
+
+#include<stdio.h>
+
+main()
+{
+    int id;
+    id=fork();
+
+    if(id>0)
+    {
+        printf("Parent will sleep");
+        sleep(10);
+    }
+    if(id==0)
+        printf("I am child");
+}
+    
+OUTPUT
+***********
+[04mca58@LINTEL 04mca58]$  cc zombie.c
+[04mca58@LINTEL 04mca58]$  ./a.out
+I am child
+Parent will sleep
+
+10)a)Write a C program to create a hard link from the text file "ise.txt" and display the file 
+
+permission, gid, block size and i-node number.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/stat.h>
+
+void quit( char *mesg, int exit_status){
+     perror(mesg);
+     exit(exit_status);
+     }
+int main(void){
+    struct stat buf;
+    int retval;
+    retval = link("ise.txt","hdlnk1.txt");
+    if (retval < 0)quit("link error:", 1);
+    if (lstat("hdlnk1.txt", &buf) == -1) quit("stat error:", 2);
+    printf("File mode:%o\n", buf.st_mode);
+    printf("File gid: %d\n", buf.st_gid);
+    printf("File block size: %d\n", buf.st_size);
+    printf("File inode number: %d \n", buf.st_ino);
+    exit(0);
+}
+
+
+o/p;-
+cat>ise.txt
+ke,t
+jk,seg
+jgkme
+
+[5b@172-1-4-31 ~]$ cc 15a.c
+[5b@172-1-4-31 ~]$ ./a.out
+File mode:100644
+File gid: 10
+File block size: 18
+File inode number: 3859999 
+[5b@172-1-4-31 ~]$ cat hdlnk1.txt
+ke,t
+jk,seg
+jgkme
+
+
+
+
+
+10)b) Write a C program to create a soft link"sfile.txt"  from the file "ise.txt", make duplicate file 
+
+descriptor and display the i-node number, file size, number of links, time of last modification"
+
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include<time.h>
+void quit( char *mesg, int exit_status){
+     perror(mesg);
+     exit(exit_status);
+     }
+
+int main(void){
+    int fd1,retval;
+    struct stat buf;
+    retval = symlink("ise.txt","symise1.txt");
+    if (retval == -1) quit("symlink error:", 1);
+    fd1 = open("symise1.txt",O_RDONLY);
+    if ( fd1 == -1)quit("open error:",2);
+    retval = dup(fd1);
+    if (retval == -1) quit("dup error:",3);
+    if(fstat(retval, &buf) < 0)quit("fstat error:", 4);
+    printf("File inode number : %d\n", buf.st_ino);
+    printf("File size in bytes: %d\n", buf.st_size);
+    printf("Number of links: %d \n", buf.st_nlink);
+    printf("Time of last modification: %s\n", ctime(&buf.st_mtime));
+}
+o/p-
+File inode number : 3859999
+File size in bytes: 18
+Number of links: 2 
+Time of last modification: Wed Dec  3 15:51:14 2014
+
+5b@172-1-4-31 ~]$ cat symise1.txt
+ke,t
+jk,seg
+jgkme
+
+
+
+--------------------------------------------------------------------------------------------------------------------------
+BEST OF LUCK☺
+
+
+
